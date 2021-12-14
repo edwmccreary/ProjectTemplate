@@ -1,0 +1,72 @@
+
+A Many to Many relationship will have table models similar to below:
+
+public class Product
+{
+    [Key]
+    public int ProductId {get;set;}
+
+    [Required]
+    public string Name {get;set;}
+    
+    [Required]
+    public string Description {get;set;}
+
+    [Required]
+    public double Price {get;set;}
+
+    public DateTime CreatedAt {get;set;} = DateTime.Now;
+    public DateTime UpdatedAt {get;set;} = DateTime.Now;
+
+    public List<Association> Categories {get;set;}
+
+}
+
+public class Category
+{
+    [Key]
+    public int CategoryId {get;set;}
+
+    [Required]
+    public string Name {get;set;}
+
+    public DateTime CreatedAt {get;set;} = DateTime.Now;
+    public DateTime UpdatedAt {get;set;} = DateTime.Now;
+
+    public List<Association> Products {get;set;}
+}
+
+public class Association
+{
+    [Key]
+    public int AssociationId {get;set;}
+
+    public int ProductId {get;set;}
+    public int CategoryId {get;set;}
+    public Product Product {get;set;}
+    public Category Category {get;set;}
+}
+
+-------------------
+Include can be used to grab the object associated with an Id.
+To view individual objects with their associated object across the many to many table use this:
+Categories is an Association object that contains a Category object that stores the object associated with the CategoryId
+
+[HttpGet("product/{id}")]
+public IActionResult ViewProduct(int id)
+{
+    Product viewProduct = _context.Products.Include(a => a.Categories).ThenInclude(p => p.Category).FirstOrDefault(c => c.ProductId == id);
+    GetViewbagCategories();
+    return View(viewProduct);
+}
+
+For One to Many build viewbag lists like this:
+private void GetChefsDishes()
+{
+    ViewBag.AllChefs = _context.Chefs.Include(c => c.dishes).ToList();
+}
+
+private void GetDishes()
+{
+    ViewBag.AllDishes = _context.Dishes.Include(d => d.chef);
+}
